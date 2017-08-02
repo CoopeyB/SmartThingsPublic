@@ -25,14 +25,17 @@ definition(
 
 
 preferences {
-    section("Turn off when this is closed") {
+    section("Turn off this") {
+        input "theswitch", "capability.switch", required: true, title: "Light"
+    }
+    section("After delay") {
+        input "thedelay", "number", required: true, title: "Seconds"
+    }
+    section("When this") {
         input "thedoor", "capability.contactSensor", required: true, title: "Sensor"
     }
-    section("After seconds") {
-        input "thedelay", "number", required: true, title: "Dealy"
-    }
-    section("Turn off this light") {
-        input "theswitch", "capability.switch", required: true, title: "Light"
+    section("is") {
+        input "openOrClosed", "enum", required: true, title: "Open/Closed", options: ["open", "closed"]
     }
 }
 
@@ -50,7 +53,7 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(thedoor, "contact.closed", closeDetectedHandler)
+    subscribe(thedoor, "contact.${openOrClosed}", closeDetectedHandler)
 }
 
 def closeDetectedHandler(evt) {
@@ -64,7 +67,7 @@ def checkDoor() {
     // get the current state object
     def doorState = thedoor.currentState("contact")
 
-    if (doorState.value == "closed") {
+    if (doorState.value == openOrClosed) {
         // get the time elapsed between now and when the sensor reported closed
         def elapsed = now() - doorState.date.time
 
@@ -72,12 +75,12 @@ def checkDoor() {
         def threshold = 1000 * (thedelay - 1)
 
         if (elapsed >= threshold) {
-            log.debug "Door has stayed closed long enough since last check ($elapsed ms):  turning switch off"
+            log.debug "Door has stayed ${openOrClosed} long enough since last check ($elapsed ms):  turning switch off"
             theswitch.off()
         } else {
-            log.debug "Door has not stayed closed long enough since last check ($elapsed ms):  doing nothing"
+            log.debug "Door has not stayed in state long enough since last check ($elapsed ms):  doing nothing"
         }
     } else {
-            log.debug "Door is open, do nothing and wait for closed"
+        log.debug "Door is not in desired state (${openOrClosed}), do nothing and wait for desired state (${openOrClosed})"
     }
 }
