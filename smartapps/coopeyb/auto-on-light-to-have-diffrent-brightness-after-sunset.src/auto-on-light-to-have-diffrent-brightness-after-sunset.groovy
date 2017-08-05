@@ -29,8 +29,8 @@ preferences {
         input "theswitch", "capability.switchLevel", required: true, title: "Dimmable Light"
     }
     section("At Brightness") {
-        input "dayBrightness", "number", required: true, title: "During Day", range: "0..100"
-        input "nightBrightness", "number", required: true, title: "During Night", range: "0..100"
+        input "dayBrightness", "number", required: true, title: "During Day (0-100)", range: "0..100"
+        input "nightBrightness", "number", required: true, title: "During Night (0-100)", range: "0..100"
     }
     section("When this") {
         input "thedoor", "capability.contactSensor", required: true, title: "Sensor"
